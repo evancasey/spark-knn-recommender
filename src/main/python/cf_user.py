@@ -1,6 +1,6 @@
-''' Implementation of user-based collaborative filtering with nearest neighbor
-	and Pearson correlation coefficient similarity measures. Based off of Marcel
-	Caraciolo's CF code: http://aimotion.blogspot.com/2009/11/collaborative-filtering-implementation.html '''
+''' Implementation of user-based collaborative filtering with Cosine Similarity
+	and Pearson correlation coefficient similarity measures. Based off of Marcel Caraciolo's 
+	code: http://aimotion.blogspot.com/2009/11/collaborative-filtering-implementation.html '''
 
 # sample dataset
 movies={'Marcel Caraciolo': {'Lady in the Water': 2.5, 'Snakes on a Plane': 3.5,
@@ -29,14 +29,14 @@ def load_dataset(path=""):
 		Parameter: The folder where the data files are stored
 		Return: the dictionary with the data
 	"""
-	#Recover the titles of the books
+	# recover the titles of the books
 	books = {}
 	for line in open(path+"BX-Books.csv"):
 		line = line.replace('"', "")
 		(id,title) = line.split(";") [0:2]
 		books[id] = title
 	
-	#Load the data
+	# load the data
 	prefs = {}
 	count = 0
 	for line in open(path+"BX-Book-Ratings.csv"):
@@ -55,22 +55,33 @@ def load_dataset(path=""):
 			print "key error found! " + user + " " + bookid
 	return prefs
 
-# returns a distance-base similarity score for person1 and person2
-def sim_distance(prefs, person1, person2):
+# returns a Cosine similarity score for p1 and p2
+def sim_cosine(prefs, p1, p2):
 	# get the list of shared_items
 	si = {}
-	for item in prefs[person1]:
-		if item in prefs[person2]:
+	for item in prefs[p1]:
+		if item in prefs[p2]:
 			si[item] = 1
 
 	# if they have no rating in common, return 0
 	if len(si) == 0: 
 		return 0
 
-	# add up the squares of all differences
-	sum_of_squares = sum([pow(prefs[person1][item]-prefs[person2][item],2) for item in prefs[person1] if item in prefs[person2]])
+	# sum of the products 
+	numerator = sum([prefs[p1][x] * prefs[p2][x] for x in si])
 
-	return 1 / (1 + sum_of_squares)
+	# sum of squares
+	sum1 = sum([prefs[p1][x]**2 for x in si])
+	sum2 = sum([prefs[p2][x]**2 for x in si])
+	
+	# dot product calculation
+	denominator = sqrt(sum1) * sqrt(sum2)
+
+	# check for denom == 0
+	if not denominator:
+		return 0.0
+	else:
+		return float(numerator) / denominator
 
 
 # returns the Pearson correlation coefficient for p1 and p2 
@@ -89,19 +100,19 @@ def sim_pearson(prefs,p1,p2):
 	n = len(si)
 
 	# sum of all preferences
-	sum1 = sum([prefs[p1][it] for it in si])
-	sum2 = sum([prefs[p2][it] for it in si])
+	sum1 = sum([prefs[p1][x] for x in si])
+	sum2 = sum([prefs[p2][x] for x in si])
 
 	# sum of the squares
-	sum1Sq = sum([pow(prefs[p1][it],2) for it in si])
-	sum2Sq = sum([pow(prefs[p2][it],2) for it in si])
+	sum1Sq = sum([prefs[p1][x]**2 for x in si])
+	sum2Sq = sum([prefs[p2][x]**2 for x in si])
 
 	# sum of the products
-	pSum = sum([prefs[p1][it] * prefs[p2][it] for it in si])
+	pSum = sum([prefs[p1][x] * prefs[p2][x] for x in si])
 
 	# calculate r (Pearson score)
 	num = pSum - (sum1 * sum2/n)
-	den = sqrt((sum1Sq - pow(sum1,2)/n) * (sum2Sq - pow(sum2,2)/n))
+	den = sqrt((sum1Sq - (sum1**2/n)) * (sum2Sq - (sum2**2/n)))
 	if den == 0:
 		return 0
 
@@ -111,7 +122,7 @@ def sim_pearson(prefs,p1,p2):
 
 # returns the best matches for person from the prefs dictionary
 # number of the results and similiraty function are optional params.
-def top_matches(prefs,person,n=5,similarity=sim_pearson):
+def top_matches(prefs,person,n=5,similarity=sim_cosine):
 	scores = [(similarity(prefs,person,other),other)
 				for other in prefs if other != person]
 	scores.sort()
@@ -121,7 +132,7 @@ def top_matches(prefs,person,n=5,similarity=sim_pearson):
 
 # gets recommendations for a person by using a weighted average
 # of every other user's rankings
-def get_recommendations(prefs,person,similarity=sim_pearson):
+def get_recommendations(prefs,person,similarity=sim_cosine):
 	totals = {}
 	sim_sums = {}
 
