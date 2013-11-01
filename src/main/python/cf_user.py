@@ -37,7 +37,7 @@ def load_dataset(path=""):
 		books[id] = title
 	
 	# load the data
-	prefs = {}
+	ratings = {}
 	count = 0
 	for line in open(path+"BX-Book-Ratings.csv"):
 		line = line.replace('"', "")
@@ -45,22 +45,22 @@ def load_dataset(path=""):
 		(user,bookid,rating) = line.split(";")
 		try:
 			if float(rating) > 0.0:
-				prefs.setdefault(user,{})
-				prefs[user][books[bookid]] = float(rating)
+				ratings.setdefault(user,{})
+				ratings[user][books[bookid]] = float(rating)
 		except ValueError:
 			count+=1
 			print "value error found! " + user + bookid + rating
 		except KeyError:
 			count +=1
 			print "key error found! " + user + " " + bookid
-	return prefs
+	return ratings
 
 # returns a Cosine similarity score for p1 and p2
-def sim_cosine(prefs, p1, p2):
+def sim_cosine(ratings, p1, p2):
 	# get the list of shared_items
 	si = {}
-	for item in prefs[p1]:
-		if item in prefs[p2]:
+	for item in ratings[p1]:
+		if item in ratings[p2]:
 			si[item] = 1
 
 	# if they have no rating in common, return 0
@@ -68,11 +68,11 @@ def sim_cosine(prefs, p1, p2):
 		return 0
 
 	# sum of the products 
-	numerator = sum([prefs[p1][x] * prefs[p2][x] for x in si])
+	numerator = sum([ratings[p1][x] * ratings[p2][x] for x in si])
 
 	# sum of squares
-	sum1 = sum([prefs[p1][x]**2 for x in si])
-	sum2 = sum([prefs[p2][x]**2 for x in si])
+	sum1 = sum([ratings[p1][x]**2 for x in si])
+	sum2 = sum([ratings[p2][x]**2 for x in si])
 	
 	# dot product calculation
 	denominator = sqrt(sum1) * sqrt(sum2)
@@ -85,11 +85,11 @@ def sim_cosine(prefs, p1, p2):
 
 
 # returns the Pearson correlation coefficient for p1 and p2 
-def sim_pearson(prefs,p1,p2):
+def sim_pearson(ratings,p1,p2):
 	# get the list of mutually rated items
 	si = {}
-	for item in prefs[p1]:
-		if item in prefs[p2]: 
+	for item in ratings[p1]:
+		if item in ratings[p2]: 
 			si[item] = 1
 
 	# if they are no rating in common, return 0
@@ -100,15 +100,15 @@ def sim_pearson(prefs,p1,p2):
 	n = len(si)
 
 	# sum of all preferences
-	sum1 = sum([prefs[p1][x] for x in si])
-	sum2 = sum([prefs[p2][x] for x in si])
+	sum1 = sum([ratings[p1][x] for x in si])
+	sum2 = sum([ratings[p2][x] for x in si])
 
 	# sum of the squares
-	sum1Sq = sum([prefs[p1][x]**2 for x in si])
-	sum2Sq = sum([prefs[p2][x]**2 for x in si])
+	sum1Sq = sum([ratings[p1][x]**2 for x in si])
+	sum2Sq = sum([ratings[p2][x]**2 for x in si])
 
 	# sum of the products
-	pSum = sum([prefs[p1][x] * prefs[p2][x] for x in si])
+	pSum = sum([ratings[p1][x] * ratings[p2][x] for x in si])
 
 	# calculate r (Pearson score)
 	num = pSum - (sum1 * sum2/n)
@@ -120,11 +120,11 @@ def sim_pearson(prefs,p1,p2):
 
 	return r
 
-# returns the best matches for person from the prefs dictionary
+# returns the best matches for person from the ratings dictionary
 # number of the results and similiraty function are optional params.
-def top_matches(prefs,person,n=5,similarity=sim_cosine):
-	scores = [(similarity(prefs,person,other),other)
-				for other in prefs if other != person]
+def top_matches(ratings,person,n=5,similarity=sim_cosine):
+	scores = [(similarity(ratings,person,other),other)
+				for other in ratings if other != person]
 	scores.sort()
 	scores.reverse()
 	return scores[0:n]
@@ -132,31 +132,31 @@ def top_matches(prefs,person,n=5,similarity=sim_cosine):
 
 # gets recommendations for a person by using a weighted average
 # of every other user's rankings
-def get_recommendations(prefs,person,similarity=sim_cosine):
+def get_recommendations(ratings,person,similarity=sim_cosine):
 	totals = {}
 	sim_sums = {}
 
-	for other in prefs:
+	for other in ratings:
 		# don't compare user to itself
 		if other == person:
 			continue
 
 		# call the similarity function we define
-		sim = similarity(prefs,person,other)
+		sim = similarity(ratings,person,other)
 
 		# ignore scores of zero or lower
 		if sim <= 0: 
 			continue
 
 		# for each of other's items calc totals + sim_sums
-		for item in prefs[other]:
+		for item in ratings[other]:
 			
 			# only score items user hasn't seen yet
-			if item not in prefs[person] or prefs[person][item] == 0:
+			if item not in ratings[person] or ratings[person][item] == 0:
 				
 				# similarity * score
 				totals.setdefault(item,0)
-				totals[item] += prefs[other][item] * sim
+				totals[item] += ratings[other][item] * sim
 		
 				# sum of similarities
 				sim_sums.setdefault(item,0)
@@ -172,14 +172,14 @@ def get_recommendations(prefs,person,similarity=sim_cosine):
 
 
 # function to transform Person, item - > Item, person
-def compose_prefs(prefs):
+def compose_ratings(ratings):
 	results = {}
-	for person in prefs:
-		for item in prefs[person]:
+	for person in ratings:
+		for item in ratings[person]:
 			results.setdefault(item,{})
 
 			# flip item and person
-			results[item][person] = prefs[person][item]
+			results[item][person] = ratings[person][item]
 	return results
 
 if __name__=="__main__":
