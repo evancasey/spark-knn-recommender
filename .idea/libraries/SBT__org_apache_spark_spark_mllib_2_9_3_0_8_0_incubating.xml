@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="SBT: org.apache.spark:spark-mllib_2.9.3:0.8.0-incubating">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.apache.spark/spark-mllib_2.9.3/jars/spark-mllib_2.9.3-0.8.0-incubating.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.apache.spark/spark-mllib_2.9.3/docs/spark-mllib_2.9.3-0.8.0-incubating-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.apache.spark/spark-mllib_2.9.3/srcs/spark-mllib_2.9.3-0.8.0-incubating-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

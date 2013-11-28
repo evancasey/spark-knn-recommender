@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="SBT: org.mortbay.jetty:jetty:6.1.26">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.mortbay.jetty/jetty/jars/jetty-6.1.26.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.mortbay.jetty/jetty/docs/jetty-6.1.26-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.mortbay.jetty/jetty/srcs/jetty-6.1.26-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

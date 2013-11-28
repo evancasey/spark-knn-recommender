@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="SBT: org.mortbay.jetty:servlet-api:2.5-20081211">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.mortbay.jetty/servlet-api/jars/servlet-api-2.5-20081211.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.mortbay.jetty/servlet-api/docs/servlet-api-2.5-20081211-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.mortbay.jetty/servlet-api/srcs/servlet-api-2.5-20081211-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

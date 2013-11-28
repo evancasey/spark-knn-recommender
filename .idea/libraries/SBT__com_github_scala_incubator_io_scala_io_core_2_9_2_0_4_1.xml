@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="SBT: com.github.scala-incubator.io:scala-io-core_2.9.2:0.4.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.github.scala-incubator.io/scala-io-core_2.9.2/jars/scala-io-core_2.9.2-0.4.1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.github.scala-incubator.io/scala-io-core_2.9.2/docs/scala-io-core_2.9.2-0.4.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.github.scala-incubator.io/scala-io-core_2.9.2/srcs/scala-io-core_2.9.2-0.4.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

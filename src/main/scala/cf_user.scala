@@ -12,6 +12,7 @@ object UserCF {
 	val sc = new SparkContext("local", "UserCF", "/home/evan/dev/grasshopper",
 	  List("target/scala-2.9.3/grasshopper_2.9.3-1.0.jar"))
 
+	// specify the data we want to use
 	val TRAIN_FILENAME = "ua.base"
   val MOVIES_FILENAME = "u.item"
 
@@ -37,7 +38,6 @@ object UserCF {
 
 		// exclude the user we are looking at
 		val filtRatings = ratings.filter(_._1 != user)
-
 
 		// transform the filtered ratings into a map of users and movie,rating pairs
 		// where each pair is a movie that the active user and another

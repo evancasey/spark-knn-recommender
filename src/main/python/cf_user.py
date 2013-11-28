@@ -185,4 +185,6 @@ def compose_ratings(ratings):
 if __name__=="__main__":
 
 	recs = get_recommendations(movies,'Leopoldo Pires')
-	print recs
+	print "recs", recs, "\n"
+	composed_recs = compose_ratings(recs)
+	print "composed_recs", recs, "\n"
