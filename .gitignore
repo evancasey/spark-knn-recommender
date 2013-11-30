@@ -1,5 +1,7 @@
 *.py[cod]
-
+.idea
+.idea_modules
+.sbt
 # C extensions
 *.so
 
