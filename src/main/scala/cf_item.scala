@@ -1,6 +1,4 @@
-/** Implementation of item-based collaborative filtering with Cosine Similarity
-  * and Pearson correlation coefficient similarity measures using the
-  * Movielens 100k dataset
+/** src: http://mlnick.github.io/blog/2013/04/01/movie-recommendations-and-more-with-spark/
   */
 
 import org.apache.spark.SparkContext
