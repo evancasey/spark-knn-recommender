@@ -1,4 +1,4 @@
-grasshopper
+sparkler
 ===========
 
-Distributed Collaborative Filtering
+Distributed Machine Learning using PySpark
