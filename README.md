@@ -1,4 +1,4 @@
 sparkler
 ===========
 
-Distributed Machine Learning using PySpark
+A library for building scalable recommender systems using PySpark
