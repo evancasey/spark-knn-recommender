@@ -9,7 +9,7 @@ from pyspark import SparkContext
 
 
 def parseVector(line):
-    return np.array([float(x) if i != 1 else x for i,x in enumerate(line.split('|'))])
+    return np.array([float(x) if i == 2 else x for i,x in enumerate(line.split('|'))])
 
 def unpackItemHist(user_id,item_hist):
     for (item_id, rating) in item_hist:
@@ -17,25 +17,33 @@ def unpackItemHist(user_id,item_hist):
 
 def findUserPairs(item_id,user_rating_hist_list):
     for user1,user2 in combinations(user_rating_hist_list,2):
-        return (user1[0],user2[0]), \
-                ((user1[1],user2[1]),(user1[2],user2[2]),item_id)
+        return (user1[0],user2[0]),((user1[1],user2[1]),(user1[2],user2[2]),item_id)
 
-def calcSim(user_pair,(ratings,item_hists,co_rating_id)):
+def calcSim(user_pair,co_rate_with_hist):
+    item_hists,ratings,co_rating_id = co_rate_with_hist
     sum_xx, sum_xy, sum_yy, sum_x, sum_y, n = (0.0, 0.0, 0.0, 0.0, 0.0, 0)
     
-    for (user_x_rating,user_y_rating) in ratings:
-        sum_xx += user_x_rating * user_x_rating
-        sum_yy += user_y_rating * user_y_rating
-        sum_xy += user_x_rating * user_y_rating
-        sum_y += user_y_rating
-        sum_x += user_x_rating
+    for rt in ratings:
+        sum_xx += np.float(rt[0]) * np.float(rt[0])
+        sum_yy += np.float(rt[1]) * np.float(rt[1])
+        sum_xy += np.float(rt[0]) * np.float(rt[1])
+        # sum_y += rt[1]
+        # sum_x += rt[0]
         n += 1
 
-    cos_sim = cosine(sum_xy,sqrt(sum_xx),sqrt(sum_yy))
+    cos_sim = cosine(sum_xy,np.sqrt(sum_xx),np.sqrt(sum_yy))
 
-    return (user_pair,(item_hists,cos_sim,n))
+    return user_pair,1
 
-def cosine(dot_product, rating_norm_squared, rating2_norm_squared):
+def tr(user_pair,item_hists,ratings,co_rating_id):
+
+    n = []
+    for x in ratings:
+        n.append(x[0])
+    
+    return user_pair, n
+
+def cosine(dot_product,rating_norm_squared,rating2_norm_squared):
     '''
     The cosine between two vectors A, B
        dotProduct(A, B) / (norm(A) * norm(B))
@@ -72,15 +80,20 @@ if __name__ == "__main__":
 
     '''
     Find all user1-user2 pair combos
-        (user1,user2) -> (user1,user2),
-                        (([user1_item_hist],user1_rating),
-                         ([user2_item_hist],user2_rating),corated_item_id)
+        (user1,user2) ->    (user1,user2),
+                            (([user1_item_hist],[user2_item_hist]),
+                            (co_rating1,co_rating2),
+                            corated_item_id
     '''
     pairwise_users = item_user_rating_pairs.map(
         lambda p: findUserPairs(p[0],p[1])).filter(
         lambda p: p is not None)
 
-    user_sims_and_ratings = pairwise_users.reduce(
-        lambda user_pair,(ratings,item_hists,co_rating_id): calcSim(user_pair,(ratings,item_hists,co_rating_id))).collect()
-
+    user_sims_and_ratings = pairwise_users.reduceByKey(calcSim).collect()
+    
     print user_sims_and_ratings
+
+    # test = pairwise_users.reduce(
+    #     lambda co_rate_with_hist,_ : tr(co_rate_with_hist[0],co_rate_with_hist[1],co_rate_with_hist[2],co_rate_with_hist[3]))
+
+    # print test

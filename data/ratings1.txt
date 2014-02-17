@@ -22,6 +22,10 @@
 167|Sabrina (1954)|4
 299|Die Hard (1988)|4
 291|Twister (1996)|2
+230|Empire Strikes Back, The (1980)|4
+59|Empire Strikes Back, The (1980)|4
+59|My Fair Lady (1964)|2
+230|My Fair Lady (1964)|2
 308|Toy Story (1995)|4
 95|Broken Arrow (1996)|2
 38|Aladdin (1992)|5
@@ -996,5 +1000,3 @@
 194|Firm, The (1993)|3
 208|Being There (1979)|5
 109|12 Angry Men (1957)|3
-230|Empire Strikes Back, The (1980)|4
-59|My Fair Lady (1964)|2
