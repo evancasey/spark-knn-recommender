@@ -1,4 +1,4 @@
-""" User-based Collaborative Filtering on pySpark """
+""" User-Item Collaborative Filtering on pySpark """
 
 import sys
 from itertools import combinations
@@ -35,13 +35,6 @@ def calcSim(user_pair,co_rate_with_hist):
 
     return user_pair,1
 
-def tr(user_pair,item_hists,ratings,co_rating_id):
-
-    n = []
-    for x in ratings:
-        n.append(x[0])
-    
-    return user_pair, n
 
 def cosine(dot_product,rating_norm_squared,rating2_norm_squared):
     '''

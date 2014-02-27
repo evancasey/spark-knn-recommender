@@ -71,7 +71,7 @@ def regularized_correlation(size, dot_product, rating_sum, \
 
 
 def combinations(iterable, r):
-    """
+    '''
     Implementation of itertools combinations method. Re-implemented here because
     of import issues in Amazon Elastic MapReduce. Was just easier to do this than
     bootstrap.
@@ -81,7 +81,7 @@ def combinations(iterable, r):
 
     combinations('ABCD', 2) --> AB AC AD BC BD CD
     combinations(range(4), 3) --> 012 013 023 123
-    """
+    '''
     pool = tuple(iterable)
     n = len(pool)
     if r > n:
