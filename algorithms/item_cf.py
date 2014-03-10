@@ -29,7 +29,7 @@ def ratingsSumCount(user_id,items_with_rating):
 
     return user_id,(item_count,item_sum,items_with_rating)
 
-def pairwiseItems(user_id,items_with_rating):
+def findItemPairs(user_id,items_with_rating):
     '''
     For each user, find all item-item pairs combos. (i.e. items with the same user) 
     '''
@@ -93,9 +93,7 @@ if __name__ == "__main__":
     '''
 
     item_item_pairs = user_item_pairs.map(
-        lambda p: pairwiseItems(p[0],p[1])).filter(
-        lambda p: p is not None).groupByKey()
-
+        lambda p: findItemPairs(p[0],p[1])).groupByKey()
 
     '''
     Get cosine similarity for each item pair
