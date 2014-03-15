@@ -1,4 +1,4 @@
-# User-Item Collaborative Filtering on pySpark
+# User-User Collaborative Filtering on pySpark
 
 import sys
 from itertools import combinations
@@ -115,7 +115,10 @@ if __name__ == "__main__":
                     ...]
     '''
     item_with_rating_and_user_hist = user_item_hist.join(user_item_rating_pairs).map(
-        lambda p: keyOnItem(p[0],p[1])).groupByKey()
+        lambda p: keyOnItem(p[0],p[1])).groupByKey().collect()
+
+    for p in item_with_rating_and_user_hist:
+        print p
 
     '''
     Find all user1-user2 pair combos with item_hists, co_ratings, and co_rated_item_id
@@ -123,12 +126,12 @@ if __name__ == "__main__":
                              (([user1_item_hist],[user2_item_hist]), (co_rating1,co_rating2), corated_item_id_2),
                              ...]
     '''
-    user_user_pairs = item_with_rating_and_user_hist.map(
-        lambda p: findUserPairs(p[0],p[1])).reduceByKey(
-        lambda p1,p2: combineLists(p1,p2)).collect()[0][1]
+    # user_user_pairs = item_with_rating_and_user_hist.map(
+    #     lambda p: findUserPairs(p[0],p[1])).reduceByKey(
+    #     lambda p1,p2: combineLists(p1,p2)).collect()[0][1]
 
-    for p in user_user_pairs:
-        print p
+    # for p in user_user_pairs:
+    #     print p
     '''
     Get cosine similarity for each user pair
         (item1,item2) ->    (similarity,co_rated_items_count)

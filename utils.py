@@ -15,3 +15,8 @@ def run_itemcf(data):
     ''' Execute item_cf.py from pySpark home '''
 
     os.system("./" + config.PYSPARK_HOME + " " + config.SPARKLER_HOME + "/item_cf.py " + config.CLUSTER_CONFIG + " " + data)
+
+def run_user_itemcf(data):
+    ''' Execute item_cf.py from pySpark home '''
+
+    os.system("./" + config.PYSPARK_HOME + " " + config.SPARKLER_HOME + "/user_item_cf.py " + config.CLUSTER_CONFIG + " " + data)
