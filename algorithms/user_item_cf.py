@@ -6,6 +6,7 @@ import numpy as np
 import pdb
 
 from pyspark import SparkContext
+# from pyspark.conf import SparkConf
 
 
 def parseVectorOnUser(line):
@@ -122,7 +123,10 @@ if __name__ == "__main__":
             "Usage: PythonUserCF <master> <file>"
         exit(-1)
 
-    sc = SparkContext(sys.argv[1], "PythonUserCF")
+    # conf = SparkConf().setMaster("local").setAppName("PythonUserCF").set("spark.executor.memory","8g")
+
+    # sc = SparkContext(conf)
+    sc = SparkContext(sys.argv[1],"PythonUserItemCF")
     lines = sc.textFile(sys.argv[2])
 
     ''' 
@@ -203,7 +207,4 @@ if __name__ == "__main__":
 
     '''
     user_item_recs = user_sim_with_item_diff.map(
-        lambda p: topRecs(p[0],p[1])).collect()
-
-    for p in user_item_recs:
-        print p
+        lambda p: topRecs(p[0],p[1])).saveAsTextFile("../data/results/user_item_cf_spark.txt")
