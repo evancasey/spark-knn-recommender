@@ -17,9 +17,9 @@ if __name__ == "__main__":
 
     # run_kmeans(DATA_KMEANS, 2, 5)
 
-    run_usercf(DATA_USERCF)
+    # run_usercf(DATA_USERCF)
 
     # run_itemcf(DATA_ITEMCF)
 
-    # run_user_itemcf(DATA_ITEMCF)
+    run_user_itemcf(DATA_ITEMCF)
    
