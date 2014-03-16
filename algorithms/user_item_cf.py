@@ -50,7 +50,6 @@ def calcSim(user_pair,rating_pairs):
         n += 1
 
     cos_sim = cosine(sum_xy,np.sqrt(sum_xx),np.sqrt(sum_yy))
-
     return user_pair, (cos_sim,n)
 
 def cosine(dot_product,rating_norm_squared,rating2_norm_squared):
@@ -62,6 +61,17 @@ def cosine(dot_product,rating_norm_squared,rating2_norm_squared):
     denominator = rating_norm_squared * rating2_norm_squared
 
     return (numerator / (float(denominator))) if denominator else 0.0
+
+def getItemHistDiff(user1_with_rating,user2_with_rating):
+    '''
+    For each user1_with_rating, user2_with_rating pair, make user1_id
+    the key and emit the set difference of user2's item_hist - user1's 
+    item_hist.
+    '''
+    (user1_id,user1_item_hist) = user1_with_rating
+    (user2_id,user2_item_hist) = user2_with_rating
+    diff_item_hist = [u2 for u2 in user2_item_hist if u2[0] not in [u1[0] for u1 in user1_item_hist]]
+    return user1_id,(user2_id,diff_item_hist)
 
 
 if __name__ == "__main__":
@@ -88,21 +98,43 @@ if __name__ == "__main__":
     item_user_pairs = item_user.join(item_user)
 
     '''
-    Key each item_user_pair on the user_pair, then aggregate all rating pairs:
+    Key each item_user_pair on the user_pair and get rid of non-unique 
+    user pairs, then aggregate all co-rating pairs:
         (user1_id,user2_id) -> [(rating1,rating2),
                                 (rating1,rating2),
                                 (rating1,rating2),
                                 ...]
     '''
     user_item_rating_pairs = item_user_pairs.map(
-        lambda p: keyOnUserPair(p[0],p[1])).groupByKey()
+        lambda p: keyOnUserPair(p[0],p[1])).filter(
+        lambda p: p[0][0] != p[0][1]).groupByKey()
 
     '''
-    Get cosine similarity for each user pair
+    Calculate the cosine similarity for each user pair:
         (user1,user2) ->    (similarity,co_raters_count)
     '''
     user_pair_sims = user_item_rating_pairs.map(
-        lambda p: calcSim(p[0],p[1])).collect()
+        lambda p: calcSim(p[0],p[1]))
 
-    for p in user_pair_sims:
+    ''' 
+    Obtain the the item history for each user:
+        user_id -> [(item_id_1, rating_1),
+                   [(item_id_2, rating_2),
+                    ...]
+    '''
+    user_item_hist = user_item.groupByKey()
+
+    '''
+    Get the cartesian product key on the first user, get rid of non-unique
+    user pairs, then get the set difference of their item hists:
+        user1_id -> user2_id,  [(item1,rating1),
+                                (item2,rating2),
+                                (item3,rating3),
+                                ...]
+    '''
+    user_item_rating_pairs = user_item_hist.cartesian(user_item_hist).filter(
+        lambda p: p[0][0] != p[1][0]).map(
+        lambda p: getItemHistDiff(p[0],p[1])).collect()
+
+    for p in user_item_rating_pairs:
         print p

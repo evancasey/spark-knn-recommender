@@ -96,7 +96,7 @@ if __name__ == "__main__":
         lambda p: findItemPairs(p[0],p[1])).groupByKey()
 
     '''
-    Get cosine similarity for each item pair
+    Calculate the cosine similarity for each item pair
         (item1,item2) ->    (similarity,co_raters_count)
     '''
 
