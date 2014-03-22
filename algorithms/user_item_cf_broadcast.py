@@ -1,4 +1,4 @@
-# User-Item Collaborative Filtering on pySpark
+# User-Item Collaborative Filtering on pySpark using broadcast variables
 
 import sys
 from collections import defaultdict
@@ -80,7 +80,7 @@ def keyOnFirstUser(user_pair,item_sim_data):
     (user1_id,user2_id) = user_pair
     return user1_id,(user2_id,item_sim_data)
 
-def topRecs(user1,items_sim_diff):
+def topRecs(user1,users_with_sim,item_diff):
 
    
     # initialize dicts to store the score of each individual item,
@@ -88,14 +88,15 @@ def topRecs(user1,items_sim_diff):
     totals = defaultdict(int)
     sim_sums = defaultdict(int)
 
-    for item_sim_diff in items_sim_diff:
+    index = [x[0] for x in item_diff].index(user1)
+
+    for i,user_with_sim in enumerate(users_with_sim):
 
         # unpack the data in each item_sim_diff 
-        (user2_id,sim_count_item_diff) = item_sim_diff
-        (sim_and_count,item_diff) = sim_count_item_diff
-        (sim,count) = sim_and_count
+        (user2_id,(sim,count)) = user_with_sim
 
-        for item_with_rating in item_diff:
+
+        for item_with_rating in item_diff[index][1][i][1]:
             
             # unpack the data in each item_with_rating tuple
             (item_id,rating) = item_with_rating
@@ -160,7 +161,7 @@ if __name__ == "__main__":
         (user1,user2) ->    (similarity,co_raters_count)
     '''
     user_pair_sims = user_item_rating_pairs.map(
-        lambda p: calcSim(p[0],p[1]))
+        lambda p: calcSim(p[0],p[1])).sortByKey()
 
     ''' 
     Obtain the the item history for each user, and key
@@ -179,10 +180,17 @@ if __name__ == "__main__":
                                 (item3,rating3),
                                 ...]
     '''
+
+    # TODO: fix this, cartesian is overkill here
     user_item_rating_pairs = user_item_hist.cartesian(user_item_hist).filter(
         lambda p: p[0][0] != p[1][0]).map(
-        lambda p: getItemHistDiff(p[0],p[1])).filter(
-        lambda p: len(p[1]) > 0) # TODO: add in placeholder in case no unrated items?
+        lambda p: getItemHistDiff(p[0],p[1])).sortByKey().map(
+        lambda p: keyOnFirstUser(p[0],p[1])).groupByKey().collect()
+        # .filter(lambda p: len(p[1]) > 0)
+         # TODO: add in placeholder in case no unrated items?
+
+    uib_rating_pairs = sc.broadcast(user_item_rating_pairs)
+
 
     '''
     Combine the item_diff and similarity data for each user pair, then 
@@ -198,13 +206,12 @@ if __name__ == "__main__":
                                                      (item3,rating3),...],
                     ...]
     '''
-    user_sim_with_item_diff = user_pair_sims.join(user_item_rating_pairs).map(
+    user_sims = user_pair_sims.map(
         lambda p: keyOnFirstUser(p[0],p[1])).groupByKey()
-
 
     '''
     Get the top recs for each user:
 
     '''
-    user_item_recs = user_sim_with_item_diff.map(
-        lambda p: topRecs(p[0],p[1])).collect()
+    user_item_recs = user_sims.map(
+        lambda p: topRecs(p[0],p[1],uib_rating_pairs.value)).collect()

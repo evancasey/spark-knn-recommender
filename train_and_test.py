@@ -2,12 +2,12 @@ import pdb
 import sys,os
 
 import config
-from utils import run_kmeans, run_usercf, run_itemcf, run_user_itemcf
+from utils import run_kmeans, run_usercf, run_itemcf, run_user_itemcf, run_user_item_cf_broadcast
 from algorithms import *
 
 DATA_KMEANS = "data/kmeans_data.txt"
 DATA_USERCF = "data/ratings2.txt"
-DATA_ITEMCF = "data/ratings3.txt"
+DATA_ITEMCF = "data/ratings.txt"
 
 if __name__ == "__main__":
 
@@ -21,5 +21,7 @@ if __name__ == "__main__":
 
     # run_itemcf(DATA_ITEMCF)
 
-    run_user_itemcf(DATA_ITEMCF)
+    # run_user_itemcf(DATA_ITEMCF)
    
+    run_user_item_cf_broadcast(DATA_ITEMCF)
+

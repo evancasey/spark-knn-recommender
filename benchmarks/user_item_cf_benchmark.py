@@ -7,13 +7,16 @@ predicted_results_file = "../data/results/user_cf_predict.csv"
 
 # returns a Cosine similarity score for p1 and p2
 def sim_cosine(ratings, p1, p2):
+
     # get the list of shared_items
     si = []
+    songs = []
     ind = 0
     for [song1,count1] in ratings[p1]:
         trunc_ratings = [r[0] for r in ratings[p2]]
-        if song1 in trunc_ratings:          
+        if song1 in trunc_ratings and songs.count(song1) == 0:          
             si.append(ind)
+            songs.append(song1)
             ind += 1
 
     # if they have no rating in common, return 0
@@ -148,7 +151,7 @@ def getAllRecommendations(user_song_history_train,num_recs=500):
 
 def getData():
     data = defaultdict(list)
-    f = open("../data/ratings.txt",'rt')
+    f = open("../data/ratings3.txt",'rt')
     reader = csv.reader(f,delimiter="|")
     for row in reader:
         data[row[0]].append([row[1],float(row[2])])
