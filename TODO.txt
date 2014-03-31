@@ -1,0 +1,8 @@
+Update pseudocode with better notation including:
+  -Function imports
+  -Helper function code
+  -Metric space/domain of variables and dimensions
+  -Fix O(N^2) bottleneck
+  -Use totals and sim_sums as acculumator variables
+  -PyFiles
+  

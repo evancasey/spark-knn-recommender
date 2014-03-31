@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     # run_itemcf(DATA_ITEMCF)
 
-    # run_user_itemcf(DATA_ITEMCF)
+    run_user_itemcf(DATA_ITEMCF)
    
-    run_user_item_cf_broadcast(DATA_ITEMCF)
+    # run_user_item_cf_broadcast(DATA_ITEMCF)
 
