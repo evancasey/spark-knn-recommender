@@ -1,7 +1,7 @@
 Sparkler
 ===========
 
-Sparkler is a Python library for building scalable recommender systems. Sparkler is built on top of [PySpark](http://spark.apache.org/docs/0.9.0/python-programming-guide.html), the Python API for [Apache Spark]{http://spark.apache.org/}.
+Sparkler is a Python library for building scalable recommender systems. Sparkler is built on top of [PySpark](http://spark.apache.org/docs/0.9.0/python-programming-guide.html), the Python API for [Apache Spark](http://spark.apache.org/).
 
 Requirements
 ------------
@@ -18,7 +18,7 @@ First, clone sparkler onto your local machine:
 $ git clone https://github.com/evancasey/sparkler.git
 ```
 
-Configure sparkler:
+Configure sparkler in config.py:
 ```python
 
 # change if you are running on Amazon EMR
