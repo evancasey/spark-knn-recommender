@@ -1,5 +1,5 @@
 import config
-import sys, os
+import sys,os
 
 def run_kmeans(data,k,converge_dist):
     ''' Execute kmeans.py from pySpark home '''
