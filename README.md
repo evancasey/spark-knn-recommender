@@ -52,8 +52,8 @@ $ ./elastic-mapreduce --create --alive --name "Spark/Shark Cluster"  --bootstrap
 Created job flow j-2Y0VECUPLFW94
 ```
 
-SSH into the master node of your cluster:
+SSH into the master node of your cluster (replace the red text with your job ID):
 
 ```bash
-./elastic-mapreduce -j <job ID> --ssh
+./elastic-mapreduce -j <font color="red">j-2Y0VECUPLFW94<font/> --ssh
 ```
