@@ -44,7 +44,16 @@ Running on Amazon EMR
 
 * create an Amazan Web Services Account
 * sign up for Elastic MapReduce
-* Acquire secret keys
-* Run Spark/Shark bootstrap script
+* install the [Amazon EMR CLI](http://docs.aws.amazon.com/ElasticMapReduce/latest/DeveloperGuide/emr-cli-install.html)
 
+Run the Spark/Shark bootstrap script:
+```bash
+$ ./elastic-mapreduce --create --alive --name "Spark/Shark Cluster"  --bootstrap-action s3://elasticmapreduce/samples/spark/0.8.1/install-spark-shark.sh --bootstrap-name "Spark/Shark"  --instance-type m1.xlarge --instance-count 3 --jobflow-role spark
+Created job flow j-2Y0VECUPLFW94
+```
 
+SSH into the master node of your cluster:
+
+```bash
+./elastic-mapreduce -j <job ID> --ssh
+```
