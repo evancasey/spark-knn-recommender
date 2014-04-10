@@ -13,18 +13,18 @@ Requirements
 Installation
 ------------
 
-First, clone sparkler into your spark directory:
-
+First, clone sparkler onto your local machine:
 ```bash
 $ git clone https://github.com/evancasey/sparkler.git
 ```
 
-Configure sparkler
+Configure sparkler:
 ```python
 
+# change if you are running on Amazon EMR
 CLUSTER_CONFIG = "local"
 
-# relative path
+# fill this in with pySpark path
 PYSPARK_HOME = "../spark/pyspark"
 SPARKLER_HOME = "../spark/python/sparkler"
 ```
@@ -34,21 +34,17 @@ In your sparkler directory, run:
 $ python setup.py
 ```
 
-
-
 Using sparkler
 --------------
-
 
 
 
 Running on Amazon EMR
 ---------------------
 
-create an Amazan Web Services Account
-sign up for Elastic MapReduce
-Secret keys
-
-Bootstrap
+* create an Amazan Web Services Account
+* sign up for Elastic MapReduce
+* Acquire secret keys
+* Run Spark/Shark bootstrap script
 
 
