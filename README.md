@@ -1,17 +1,17 @@
-sparkler
+Sparkler
 ===========
 
-sparkler is a library for building scalable recommender systems on PySpark
+Sparkler is a Python library for building scalable recommender systems. Sparkler is built on top of [PySpark](http://spark.apache.org/docs/0.9.0/python-programming-guide.html), the Python API for [Apache Spark]{http://spark.apache.org/}.
 
-Right now, sparkler supports:
-  
-* User-item collaborative filtering
-* Item-item collaborative filtering
+Requirements
+------------
+
+* Python >= 2.7.3
+* Spark >= 0.7.0
+* Numpy
 
 Installation
 ------------
-
-sparkler requires a working installation of Spark 0.7.0+
 
 First, clone sparkler into your spark directory:
 
@@ -19,7 +19,36 @@ First, clone sparkler into your spark directory:
 $ git clone https://github.com/evancasey/sparkler.git
 ```
 
+Configure sparkler
+```python
+
+CLUSTER_CONFIG = "local"
+
+# relative path
+PYSPARK_HOME = "../spark/pyspark"
+SPARKLER_HOME = "../spark/python/sparkler"
+```
+
+In your sparkler directory, run:
+```bash
+$ python setup.py
+```
+
 
 
 Using sparkler
 --------------
+
+
+
+
+Running on Amazon EMR
+---------------------
+
+create an Amazan Web Services Account
+sign up for Elastic MapReduce
+Secret keys
+
+Bootstrap
+
+
