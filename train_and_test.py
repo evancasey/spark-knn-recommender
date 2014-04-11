@@ -7,7 +7,7 @@ from algorithms import *
 
 DATA_KMEANS = "data/kmeans_data.txt"
 DATA_USERCF = "data/ratings2.txt"
-DATA_ITEMCF = "s3n://sparkler-data/ratings.txt"
+DATA_ITEMCF = "s3n://sparkler-data/ratings10k.txt"
 
 if __name__ == "__main__":
 
