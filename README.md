@@ -1,7 +1,7 @@
 Sparkler
 ===========
 
-Sparkler is a Python library for building scalable recommender systems. Sparkler is built on top of [PySpark](http://spark.apache.org/docs/0.9.0/python-programming-guide.html), the Python API for [Apache Spark](http://spark.apache.org/).
+Sparkler is a Python library for building scalable recommender systems. Sparkler is built on top of [PySpark](http://spark.apache.org/docs/0.9.0/python-programming-guide.html), the Python API for [Apache Spark](http://spark.apache.org/) and can be deployed locally or on [Amazon EMR](https://aws.amazon.com/elasticmapreduce/).
 
 Requirements
 ------------
