@@ -4,6 +4,7 @@ Update pseudocode with better notation including:
   -Spark builtins (join,broadcast,groupby,etc)
   -Metric space/domain of variables and dimensions
   -Diagrams
+  -Final formatting
   
 Code:
   -PyFiles
