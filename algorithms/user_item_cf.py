@@ -134,8 +134,8 @@ if __name__ == "__main__":
         user_id -> item_id,rating
         item_id -> user_id,rating
     '''
-    user_item = lines.map(parseVectorOnUser).cache()
-    item_user = lines.map(parseVectorOnItem).cache()
+    user_item = lines.map(parseVectorOnUser)
+    item_user = lines.map(parseVectorOnItem)
 
     '''
     Get co_rating users by joining on item_id:

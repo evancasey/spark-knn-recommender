@@ -53,6 +53,12 @@ def calcSim(user_pair,rating_pairs):
     cos_sim = cosine(sum_xy,np.sqrt(sum_xx),np.sqrt(sum_yy))
     return user_pair, (cos_sim,n)
 
+def closestNeighbors(user,users_and_sims,n):
+
+    users_and_sims.sort(key=lambda x: x[1][0],reverse=True)
+
+    return user, users_and_sims[:n]
+
 def cosine(dot_product,rating_norm_squared,rating2_norm_squared):
     '''
     The cosine between two vectors A, B
@@ -62,6 +68,16 @@ def cosine(dot_product,rating_norm_squared,rating2_norm_squared):
     denominator = rating_norm_squared * rating2_norm_squared
 
     return (numerator / (float(denominator))) if denominator else 0.0
+
+def getAllPredictions(user,closest_neighbors,ui):
+
+    all_predictions = []
+    for (neighbor,sim_and_count) in closest_neighbors:
+        predictions = [i2 for i2 in ui[neighbor] if i2[0] not in [i1[0] for i1 in ui[user]]]
+        all_predictions.append((neighbor,sim_and_count,predictions))
+
+    return user, all_predictions
+
 
 def getItemHistDiff(user1_with_rating,user2_with_rating):
     '''
@@ -91,9 +107,8 @@ def topRecs(user1,items_sim_diff):
     for item_sim_diff in items_sim_diff:
 
         # unpack the data in each item_sim_diff 
-        (user2_id,sim_count_item_diff) = item_sim_diff
-        (sim_and_count,item_diff) = sim_count_item_diff
-        (sim,count) = sim_and_count
+        (user2_id,sim_count,item_diff) = item_sim_diff
+        (sim,count) = sim_count
 
         for item_with_rating in item_diff:
             
@@ -160,75 +175,40 @@ if __name__ == "__main__":
     '''
     user_pair_sims = pairwise_users.map(
         lambda p: calcSim(p[0],p[1])).map(
-        lambda p: keyOnFirstUser(p[0],p[1]).groupByKey().collect()
+        lambda p: keyOnFirstUser(p[0],p[1])).groupByKey().map(
+        lambda p: closestNeighbors(p[0],p[1],50))
 
-    pdb.set_trace()
+    # generate a dict of user1 -> [user2, (sim,count)]
+    # us_dict = {}
+    # for (user,data) in user_pair_sims: 
+    #     us_dict[user] = data
 
-    # on master node
-    # for user in users:
+    # us = sc.broadcast(us_dict)
 
-    #     # filter "farthest neighbors", input active user and num neighbors, keep similarities
-    #     # (user) -> (user1,rating), (user2,rating),...
-    #     userNeighbors = user_pair_sims.filter(lambda p: closestNeighbors[p[0],p[1],user])
+    ''' 
+    Obtain the the item history for each user, and key
+    on the first user:
+        user_id -> [(item_id_1, rating_1),
+                   [(item_id_2, rating_2),
+                    ...]
+    '''
+    user_item = lines.map(parseVectorOnUser)
+    user_item_hist = user_item.groupByKey().collect()
 
-    #     # create broadcast to store item rankings
-    #     # {item:{simSums,total},item2:{}}
-    #     ui = Get
+    # generate a dict of user1 -> [(item,rating)]
+    ui_dict = {}
+    for (user,items) in user_item_hist: 
+        ui_dict[user] = items
 
-    #     '''
-    #     broadcast the cartesian product key on the first user, get rid of non-unique
-    #     user pairs, then get the set difference of their item hists:
-    #         (user1_id,user2_id) -> [(item1,rating1),
-    #                                 (item2,rating2),
-    #                                 (item3,rating3),
-    #                                 ...]
-    #     '''
-    #     user_item_rating_pairs = user_item_hist.cartesian(user_item_hist).filter(
-    #         lambda p: p[0][0] != p[1][0]).map(
-    #         lambda p: getItemHistDiff(p[0],p[1])).filter(
-    #         lambda p: len(p[1]) > 0) # TODO: add in placeholder in case no unrated items?
+    ui = sc.broadcast(ui_dict)
 
-    #     '''
-    #     Combine the item_diff and similarity data for each user pair, then 
-    #     key on the id of the first user, and aggregate
-    #         user1_id -> [(user2_id,sim,co_rating_count, [(item1,rating1),
-    #                                                      (item2,rating2),
-    #                                                      (item3,rating3),...],
-    #                      (user2_id,sim,co_rating_count, [(item1,rating1),
-    #                                                      (item2,rating2),
-    #                                                      (item3,rating3),...],
-    #                      (user2_id,sim,co_rating_count, [(item1,rating1),
-    #                                                      (item2,rating2),
-    #                                                      (item3,rating3),...],
-    #                     ...]
-    #     '''
-    #     user_sim_with_item_diff = user_item_rating_pairs.map(
-    #         lambda p: keyOnFirstUser(p[0],p[1])).groupByKey()
-
-
-    #     for item in ui[user]:
-
-    #         weightedSums #update broadcast vbl and update
-
-    #     return ui
-
-
-    # ''' 
-    # Obtain the the item history for each user, and key
-    # on the first user:
-    #     user_id -> [(item_id_1, rating_1),
-    #                [(item_id_2, rating_2),
-    #                 ...]
-    # '''
-    # # user_item_hist = user_item.groupByKey()
-
-    # '''
-
+    unrankedPredictions = user_pair_sims.map(
+        lambda p: getAllPredictions(p[0],p[1],ui.value))
 
 
     # '''
     # Get the top recs for each user:
 
     # '''
-    # user_item_recs = user_sim_with_item_diff.map(
-    #     lambda p: topRecs(p[0],p[1],uib_sims.value)).collect()
+    user_item_recs = unrankedPredictions.map(
+        lambda p: topRecs(p[0],p[1])).collect()
