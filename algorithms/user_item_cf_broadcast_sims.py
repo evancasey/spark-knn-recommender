@@ -134,8 +134,7 @@ if __name__ == "__main__":
         user_id -> item_id,rating
         item_id -> user_id,rating
     '''
-    user_item = lines.map(parseVectorOnUser).cache()
-    item_user = lines.map(parseVectorOnItem).cache()
+    item_user = lines.map(parseVectorOnItem)
 
     '''
     Get co_rating users by joining on item_id:
@@ -151,7 +150,7 @@ if __name__ == "__main__":
                                 (rating1,rating2),
                                 ...]
     '''
-    user_item_rating_pairs = item_user_pairs.map(
+    pairwise_users = item_user_pairs.map(
         lambda p: keyOnUserPair(p[0],p[1])).filter(
         lambda p: p[0][0] != p[0][1]).groupByKey()
 
@@ -159,56 +158,77 @@ if __name__ == "__main__":
     Calculate the cosine similarity for each user pair:
         (user1,user2) ->    (similarity,co_raters_count)
     '''
-    user_pair_sims = user_item_rating_pairs.map(
+    user_pair_sims = pairwise_users.map(
         lambda p: calcSim(p[0],p[1])).map(
         lambda p: keyOnFirstUser(p[0],p[1]).groupByKey().collect()
 
-    uib_sims = sc.broadcast(user_pair_sims)
+    pdb.set_trace()
+
+    # on master node
+    # for user in users:
+
+    #     # filter "farthest neighbors", input active user and num neighbors, keep similarities
+    #     # (user) -> (user1,rating), (user2,rating),...
+    #     userNeighbors = user_pair_sims.filter(lambda p: closestNeighbors[p[0],p[1],user])
+
+    #     # create broadcast to store item rankings
+    #     # {item:{simSums,total},item2:{}}
+    #     ui = Get
+
+    #     '''
+    #     broadcast the cartesian product key on the first user, get rid of non-unique
+    #     user pairs, then get the set difference of their item hists:
+    #         (user1_id,user2_id) -> [(item1,rating1),
+    #                                 (item2,rating2),
+    #                                 (item3,rating3),
+    #                                 ...]
+    #     '''
+    #     user_item_rating_pairs = user_item_hist.cartesian(user_item_hist).filter(
+    #         lambda p: p[0][0] != p[1][0]).map(
+    #         lambda p: getItemHistDiff(p[0],p[1])).filter(
+    #         lambda p: len(p[1]) > 0) # TODO: add in placeholder in case no unrated items?
+
+    #     '''
+    #     Combine the item_diff and similarity data for each user pair, then 
+    #     key on the id of the first user, and aggregate
+    #         user1_id -> [(user2_id,sim,co_rating_count, [(item1,rating1),
+    #                                                      (item2,rating2),
+    #                                                      (item3,rating3),...],
+    #                      (user2_id,sim,co_rating_count, [(item1,rating1),
+    #                                                      (item2,rating2),
+    #                                                      (item3,rating3),...],
+    #                      (user2_id,sim,co_rating_count, [(item1,rating1),
+    #                                                      (item2,rating2),
+    #                                                      (item3,rating3),...],
+    #                     ...]
+    #     '''
+    #     user_sim_with_item_diff = user_item_rating_pairs.map(
+    #         lambda p: keyOnFirstUser(p[0],p[1])).groupByKey()
 
 
-    ''' 
-    Obtain the the item history for each user, and key
-    on the first user:
-        user_id -> [(item_id_1, rating_1),
-                   [(item_id_2, rating_2),
-                    ...]
-    '''
-    user_item_hist = user_item.groupByKey()
+    #     for item in ui[user]:
 
-    '''
-    Get the cartesian product key on the first user, get rid of non-unique
-    user pairs, then get the set difference of their item hists:
-        (user1_id,user2_id) -> [(item1,rating1),
-                                (item2,rating2),
-                                (item3,rating3),
-                                ...]
-    '''
-    user_item_rating_pairs = user_item_hist.cartesian(user_item_hist).filter(
-        lambda p: p[0][0] != p[1][0]).map(
-        lambda p: getItemHistDiff(p[0],p[1])).filter(
-        lambda p: len(p[1]) > 0) # TODO: add in placeholder in case no unrated items?
+    #         weightedSums #update broadcast vbl and update
 
-    '''
-    Combine the item_diff and similarity data for each user pair, then 
-    key on the id of the first user, and aggregate
-        user1_id -> [(user2_id,sim,co_rating_count, [(item1,rating1),
-                                                     (item2,rating2),
-                                                     (item3,rating3),...],
-                     (user2_id,sim,co_rating_count, [(item1,rating1),
-                                                     (item2,rating2),
-                                                     (item3,rating3),...],
-                     (user2_id,sim,co_rating_count, [(item1,rating1),
-                                                     (item2,rating2),
-                                                     (item3,rating3),...],
-                    ...]
-    '''
-    user_sim_with_item_diff = user_item_rating_pairs.map(
-        lambda p: keyOnFirstUser(p[0],p[1])).groupByKey()
+    #     return ui
 
 
-    '''
-    Get the top recs for each user:
+    # ''' 
+    # Obtain the the item history for each user, and key
+    # on the first user:
+    #     user_id -> [(item_id_1, rating_1),
+    #                [(item_id_2, rating_2),
+    #                 ...]
+    # '''
+    # # user_item_hist = user_item.groupByKey()
 
-    '''
-    user_item_recs = user_sim_with_item_diff.map(
-        lambda p: topRecs(p[0],p[1],uib_sims.value)).collect()
+    # '''
+
+
+
+    # '''
+    # Get the top recs for each user:
+
+    # '''
+    # user_item_recs = user_sim_with_item_diff.map(
+    #     lambda p: topRecs(p[0],p[1],uib_sims.value)).collect()
