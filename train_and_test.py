@@ -6,7 +6,7 @@ from utils import run_kmeans, run_usercf, run_itemcf, run_user_itemcf, run_user_
 from algorithms import *
 
 DATA_KMEANS = "data/kmeans_data.txt"
-DATA_USERCF = "data/ratings3.txt"
+DATA_USERCF = "data/ratings10m.txt"
 DATA_ITEMCF = "s3n://sparkler-data/ratings10k.txt"
 
 if __name__ == "__main__":
@@ -21,7 +21,13 @@ if __name__ == "__main__":
 
     # run_itemcf(DATA_USERCF)
 
+<<<<<<< Updated upstream
     run_user_itemcf(DATA_USERCF)
    
     # run_user_item_cf_broadcast(DATA_USERCF)
+=======
+    # run_user_itemcf(DATA_ITEMCF)
+   
+    run_user_item_cf_broadcast(DATA_ITEMCF)
+>>>>>>> Stashed changes
 
