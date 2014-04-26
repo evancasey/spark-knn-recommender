@@ -2,6 +2,7 @@
 
 import sys
 from collections import defaultdict
+from itertools import combinations
 import numpy as np
 import pdb
 

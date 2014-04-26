@@ -1,12 +1,12 @@
-# User-Item Collaborative Filtering on pySpark
+# User-based Collaborative Filtering on pySpark with cosine similarity and weighted sums using broadcast variables
 
 import sys
 from collections import defaultdict
+from itertools import combinations
 import numpy as np
 import pdb
 
 from pyspark import SparkContext
-# from pyspark.conf import SparkConf
 
 
 def parseVectorOnUser(line):
@@ -25,15 +25,12 @@ def parseVectorOnItem(line):
     line = line.split("|")
     return line[1],(line[0],float(line[2]))
 
-def keyOnUserPair(item_id,user_and_rating_pair):
-    ''' 
-    Convert each item and co_rating user pairs to a new vector
-    keyed on the user pair ids, with the co_ratings as their value. 
+def findUserPairs(item_id,users_with_rating):
     '''
-    (user1_with_rating,user2_with_rating) = user_and_rating_pair
-    user1_id,user2_id = user1_with_rating[0],user2_with_rating[0]
-    user1_rating,user2_rating = user1_with_rating[1],user2_with_rating[1]
-    return (user1_id,user2_id),(user1_rating,user2_rating)
+    For each item, find all user-user pairs combos. (i.e. users with the same item) 
+    '''
+    for user1,user2 in combinations(users_with_rating,2):
+        return (user1[0],user2[0]),(user1[1],user2[1])
 
 def calcSim(user_pair,rating_pairs):
     ''' 
@@ -63,6 +60,22 @@ def cosine(dot_product,rating_norm_squared,rating2_norm_squared):
 
     return (numerator / (float(denominator))) if denominator else 0.0
 
+def closestNeighbors(user,users_and_sims,n):
+
+    users_and_sims.sort(key=lambda x: x[1][0],reverse=True)
+
+    return user, users_and_sims[:n]
+
+def getAllPredictions(user,closest_neighbors,ui):
+
+    all_predictions = []
+    for (neighbor,sim_and_count) in closest_neighbors:
+        predictions = [i2 for i2 in ui[neighbor] if i2[0] not in [i1[0] for i1 in ui[user]]]
+        all_predictions.append((neighbor,sim_and_count,predictions))
+
+    return user, all_predictions
+
+
 def getItemHistDiff(user1_with_rating,user2_with_rating):
     '''
     For each user1_with_rating, user2_with_rating pair, emit the set 
@@ -91,9 +104,8 @@ def topRecs(user1,items_sim_diff):
     for item_sim_diff in items_sim_diff:
 
         # unpack the data in each item_sim_diff 
-        (user2_id,sim_count_item_diff) = item_sim_diff
-        (sim_and_count,item_diff) = sim_count_item_diff
-        (sim,count) = sim_and_count
+        (user2_id,sim_count,item_diff) = item_sim_diff
+        (sim,count) = sim_count
 
         for item_with_rating in item_diff:
             
@@ -123,88 +135,68 @@ if __name__ == "__main__":
             "Usage: PythonUserCF <master> <file>"
         exit(-1)
 
-    # conf = SparkConf().setMaster("local").setAppName("PythonUserCF").set("spark.executor.memory","8g")
-
-    # sc = SparkContext(conf)
     sc = SparkContext(sys.argv[1],"PythonUserItemCF")
     lines = sc.textFile(sys.argv[2])
 
-    ''' 
-    Parse each line both ways:
-        user_id -> item_id,rating
-        item_id -> user_id,rating
     '''
-    user_item = lines.map(parseVectorOnUser)
-    item_user = lines.map(parseVectorOnItem)
-
-    '''
-    Get co_rating users by joining on item_id:
+    Obtain the sparse item-user matrix and filter out items with one or less user interactions:
         item_id -> ((user_1,rating),(user2,rating))
     '''
-    item_user_pairs = item_user.join(item_user)
+    item_user_pairs = lines.map(parseVectorOnItem).groupByKey().filter(
+        lambda p: len(p[1]) > 1)
 
     '''
-    Key each item_user_pair on the user_pair and get rid of non-unique 
-    user pairs, then aggregate all co-rating pairs:
+    Get all item-item pair combos:
         (user1_id,user2_id) -> [(rating1,rating2),
                                 (rating1,rating2),
                                 (rating1,rating2),
                                 ...]
     '''
-    user_item_rating_pairs = item_user_pairs.map(
-        lambda p: keyOnUserPair(p[0],p[1])).filter(
-        lambda p: p[0][0] != p[0][1]).groupByKey()
+    pairwise_users = item_user_pairs.map(
+        lambda p: findUserPairs(p[0],p[1])).groupByKey()
 
     '''
-    Calculate the cosine similarity for each user pair:
+    Calculate the cosine similarity for each user pair and select the top-N nearest neighbors:
         (user1,user2) ->    (similarity,co_raters_count)
     '''
-    user_pair_sims = user_item_rating_pairs.map(
-        lambda p: calcSim(p[0],p[1]))
+    user_pair_sims = pairwise_users.map(
+        lambda p: calcSim(p[0],p[1])).map(
+        lambda p: keyOnFirstUser(p[0],p[1])).groupByKey().map(
+        lambda p: closestNeighbors(p[0],p[1],50)).collect()
 
-    ''' 
-    Obtain the the item history for each user, and key
-    on the first user:
-        user_id -> [(item_id_1, rating_1),
-                   [(item_id_2, rating_2),
-                    ...]
-    '''
-    user_item_hist = user_item.groupByKey()
+    pdb.set_trace()
 
-    '''
-    Get the cartesian product key on the first user, get rid of non-unique
-    user pairs, then get the set difference of their item hists:
-        (user1_id,user2_id) -> [(item1,rating1),
-                                (item2,rating2),
-                                (item3,rating3),
-                                ...]
-    '''
-    user_item_rating_pairs = user_item_hist.cartesian(user_item_hist).filter(
-        lambda p: p[0][0] != p[1][0]).map(
-        lambda p: getItemHistDiff(p[0],p[1])).filter(
-        lambda p: len(p[1]) > 0) # TODO: add in placeholder in case no unrated items?
+    # # generate a dict of user1 -> [user2, (sim,count)]
+    # # us_dict = {}
+    # # for (user,data) in user_pair_sims: 
+    # #     us_dict[user] = data
 
-    '''
-    Combine the item_diff and similarity data for each user pair, then 
-    key on the id of the first user, and aggregate
-        user1_id -> [(user2_id,sim,co_rating_count, [(item1,rating1),
-                                                     (item2,rating2),
-                                                     (item3,rating3),...],
-                     (user2_id,sim,co_rating_count, [(item1,rating1),
-                                                     (item2,rating2),
-                                                     (item3,rating3),...],
-                     (user2_id,sim,co_rating_count, [(item1,rating1),
-                                                     (item2,rating2),
-                                                     (item3,rating3),...],
-                    ...]
-    '''
-    user_sim_with_item_diff = user_pair_sims.join(user_item_rating_pairs).map(
-        lambda p: keyOnFirstUser(p[0],p[1])).groupByKey()
+    # # us = sc.broadcast(us_dict)
+
+    # ''' 
+    # Obtain the the item history for each user, and key
+    # on the first user:
+    #     user_id -> [(item_id_1, rating_1),
+    #                [(item_id_2, rating_2),
+    #                 ...]
+    # '''
+    # user_item = lines.map(parseVectorOnUser)
+    # user_item_hist = user_item.groupByKey().collect()
+
+    # # generate a dict of user1 -> [(item,rating)]
+    # ui_dict = {}
+    # for (user,items) in user_item_hist: 
+    #     ui_dict[user] = items
+
+    # ui = sc.broadcast(ui_dict)
+
+    # unrankedPredictions = user_pair_sims.map(
+    #     lambda p: getAllPredictions(p[0],p[1],ui.value))
 
 
-    '''
-    Get the top recs for each user:
+    # # '''
+    # # Get the top recs for each user:
 
-    '''
-    user_item_recs = user_sim_with_item_diff.map(
-        lambda p: topRecs(p[0],p[1])).collect()
+    # # '''
+    # user_item_recs = unrankedPredictions.map(
+    #     lambda p: topRecs(p[0],p[1])).collect()
