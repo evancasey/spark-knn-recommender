@@ -73,6 +73,8 @@ def sampleInteractions(user_id,items_with_rating,n):
     '''
     if len(items_with_rating) > n:
         return user_id, random.sample(items_with_rating,n)
+    else:
+        return user_id, items_with_rating
 
 def topNRecommendations(user_id,items_with_rating,item_sims,n):
     '''
