@@ -17,8 +17,8 @@ if __name__ == "__main__":
 
     # run_kmeans(DATA_KMEANS, 2, 5)
 
-    run_usercf(DATA_CF)
+    run_usercf(DATA_CF_S3)
 
-    # run_itemcf(DATA_CF)
+    # run_itemcf(DATA_CF_S3)
 
 
