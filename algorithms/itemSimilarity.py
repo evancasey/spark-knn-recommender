@@ -67,8 +67,7 @@ if __name__ == "__main__":
                    [(item_id_2, rating_2),
                     ...]
     '''
-    user_item_pairs = lines.map(parseVector).groupByKey().filter(
-        lambda p: len(p[1]) > 1)
+    user_item_pairs = lines.map(parseVector).groupByKey().cache()
 
     '''
     Get all item-item pair combos
@@ -77,7 +76,8 @@ if __name__ == "__main__":
                              ...]
     '''
 
-    pairwise_items = user_item_pairs.map(
+    pairwise_items = user_item_pairs.filter(
+        lambda p: len(p[1]) > 1).map(
         lambda p: findItemPairs(p[0],p[1])).groupByKey()
 
     '''

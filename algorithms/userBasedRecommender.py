@@ -74,6 +74,41 @@ def nearestNeighbors(user,users_and_sims,n):
     users_and_sims.sort(key=lambda x: x[1][0],reverse=True)
     return user, users_and_sims[:n]
 
+def topNRecommendations(user_id,user_sims,users_with_rating,n):
+    '''
+    Calculate the top-N item recommendations for each user using the 
+    weighted sums method
+    '''
+
+    # initialize dicts to store the score of each individual item,
+    # since an item can exist in more than one item neighborhood
+    totals = defaultdict(int)
+    sim_sums = defaultdict(int)
+
+    for (neighbor,(sim,count)) in user_sims:
+
+        # lookup the item predictions for this neighbor
+        unscored_items = users_with_rating.get(neighbor,None)
+
+        for (item,rating) in unscored_items:
+
+            if neighbor != item:
+
+                # update totals and sim_sums with the rating data
+                totals[neighbor] += sim * rating
+                sim_sums[neighbor] += sim
+
+    # create the normalized list of scored items 
+    scored_items = [(total/sim_sums[item],item) for item,total in totals.items()]
+
+    # sort the scored items in ascending order
+    scored_items.sort(reverse=True)
+
+    # take out the item score
+    ranked_items = [x[1] for x in scored_items]
+
+    return user_id,ranked_items[:n]
+
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print >> sys.stderr, \
@@ -107,7 +142,28 @@ if __name__ == "__main__":
     user_sims = pairwise_users.map(
         lambda p: calcSim(p[0],p[1])).map(
         lambda p: keyOnFirstUser(p[0],p[1])).groupByKey().map(
-        lambda p: nearestNeighbors(p[0],p[1],50)).collect()
+        lambda p: nearestNeighbors(p[0],p[1],50))
 
-    pdb.set_trace()
+    ''' 
+    Obtain the the item history for each user and store it as a broadcast variable
+        user_id -> [(item_id_1, rating_1),
+                   [(item_id_2, rating_2),
+                    ...]
+    '''
+
+    user_item_hist = lines.map(parseVectorOnUser).groupByKey().collect()
+
+    ui_dict = {}
+    for (user,items) in user_item_hist: 
+        ui_dict[user] = items
+
+    uib = sc.broadcast(ui_dict)
+
+    '''
+    Calculate the top-N item recommendations for each user
+        user_id -> [item1,item2,item3,...]
+    '''
+    user_item_recs = user_sims.map(
+        lambda p: topNRecommendations(p[0],p[1],uib.value,100)).collect()
+
 
