@@ -82,9 +82,7 @@ def topNRecommendations(user_id,items_with_rating,item_sims,n):
         nearest_neighbors = item_sims.get(item,None)
 
         if nearest_neighbors:
-
             for (neighbor,(sim,count)) in nearest_neighbors:
-
                 if neighbor != item:
 
                     # update totals and sim_sums with the rating data
@@ -95,8 +93,7 @@ def topNRecommendations(user_id,items_with_rating,item_sims,n):
     scored_items = [(total/sim_sums[item],item) for item,total in totals.items()]
 
     # sort the scored items in ascending order
-    scored_items.sort()
-    scored_items.reverse()
+    scored_items.sort(reverse=True)
 
     # take out the item score
     ranked_items = [x[1] for x in scored_items]
