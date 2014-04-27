@@ -4,6 +4,7 @@ import sys
 from collections import defaultdict
 from itertools import combinations
 import numpy as np
+import random
 import pdb
 
 from pyspark import SparkContext
@@ -64,6 +65,14 @@ def nearestNeighbors(item_id,items_and_sims,n):
     '''
     items_and_sims.sort(key=lambda x: x[1][0],reverse=True)
     return item_id, items_and_sims[:n]
+
+def sampleInteractions(user_id,items_with_rating,n):
+    '''
+    For users with # interactions > n, replace their interaction history
+    with a sample of n items_with_rating
+    '''
+    if len(items_with_rating) > n:
+        return user_id, random.sample(items_with_rating,n)
 
 def topNRecommendations(user_id,items_with_rating,item_sims,n):
     '''
@@ -153,4 +162,5 @@ if __name__ == "__main__":
         user_id -> [item1,item2,item3,...]
     '''
     user_item_recs = user_item_pairs.map(
+        lambda p: sampleInteractions(p[0],p[1],500)).map(
         lambda p: topNRecommendations(p[0],p[1],isb.value,100)).collect()
