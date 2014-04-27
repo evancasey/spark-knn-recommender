@@ -6,7 +6,8 @@ from utils import run_kmeans, run_usercf, run_itemcf
 from algorithms import *
 
 DATA_KMEANS = "data/kmeans_data.txt"
-DATA_CF = "data/ratings10m.txt"
+DATA_CF_LOCAL = "data/ratings10m.txt"
+DATA_CF_S3 = "s3n://sparkler-data/ratings10k.txt"
 
 if __name__ == "__main__":
 
@@ -16,8 +17,8 @@ if __name__ == "__main__":
 
     # run_kmeans(DATA_KMEANS, 2, 5)
 
-    # run_usercf(DATA_CF)
+    run_usercf(DATA_CF)
 
-    run_itemcf(DATA_CF)
+    # run_itemcf(DATA_CF)
 
 
