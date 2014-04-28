@@ -21,4 +21,5 @@ if __name__ == "__main__":
 
     run_itemcf(DATA_CF_LOCAL)
 
+    # run_itemcf(DATA_CF_S3)
 
