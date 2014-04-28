@@ -34,3 +34,7 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# Data files
+ratings10m.txt
+data/ratings10m.txt
