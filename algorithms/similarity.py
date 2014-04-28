@@ -68,33 +68,3 @@ def regularized_correlation(size, dot_product, rating_sum, \
     w = size / float(size + virtual_cont)
 
     return w * unregularizedCorrelation + (1.0 - w) * prior_correlation
-
-
-def combinations(iterable, r):
-    '''
-    Implementation of itertools combinations method. Re-implemented here because
-    of import issues in Amazon Elastic MapReduce. Was just easier to do this than
-    bootstrap.
-    More info here: http://docs.python.org/library/itertools.html#itertools.combinations
-
-    Input/Output:
-
-    combinations('ABCD', 2) --> AB AC AD BC BD CD
-    combinations(range(4), 3) --> 012 013 023 123
-    '''
-    pool = tuple(iterable)
-    n = len(pool)
-    if r > n:
-        return
-    indices = range(r)
-    yield tuple(pool[i] for i in indices)
-    while True:
-        for i in reversed(range(r)):
-            if indices[i] != i + n - r:
-                break
-        else:
-            return
-        indices[i] += 1
-        for j in range(i + 1, r):
-            indices[j] = indices[j - 1] + 1
-        yield tuple(pool[i] for i in indices)

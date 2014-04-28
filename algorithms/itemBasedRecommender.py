@@ -5,10 +5,11 @@ from collections import defaultdict
 from itertools import combinations
 import numpy as np
 import random
+import csv
 import pdb
 
 from pyspark import SparkContext
-
+from recsys.evaluation.prediction import MAE
 
 def parseVector(line):
     '''
@@ -107,9 +108,9 @@ def topNRecommendations(user_id,items_with_rating,item_sims,n):
     scored_items.sort(reverse=True)
 
     # take out the item score
-    ranked_items = [x[1] for x in scored_items]
+    # ranked_items = [x[1] for x in scored_items]
 
-    return user_id,ranked_items[:n]
+    return user_id,scored_items[:n]
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
@@ -165,4 +166,31 @@ if __name__ == "__main__":
         user_id -> [item1,item2,item3,...]
     '''
     user_item_recs = user_item_pairs.map(
-        lambda p: topNRecommendations(p[0],p[1],isb.value,100)).collect()
+        lambda p: topNRecommendations(p[0],p[1],isb.value,500)).collect()
+
+    '''
+    Read in test data and calculate MAE
+    '''
+
+    test_ratings = defaultdict(list)
+
+    # read in the test data
+    f = open("tests/data/cftest.txt", 'rt')
+    reader = csv.reader(f, delimiter='|')
+    for row in reader:
+        user = row[0]
+        item = row[1]
+        rating = row[2]
+        test_ratings[user] += [(item,rating)]
+
+    # create train-test rating tuples
+    preds = []
+    for (user,items_with_rating) in user_item_recs:
+        for (rating,item) in items_with_rating:
+            for (test_item,test_rating) in test_ratings[user]:                
+                if str(test_item) == str(item):
+                    preds.append((rating,float(test_rating)))
+
+    mae = MAE(preds)
+    result = mae.compute()
+    print "Mean Absolute Error: ",result

@@ -1,5 +1,5 @@
 # local settings
-CLUSTER_CONFIG = "local[8]"
+CLUSTER_CONFIG = "local[4]"
 PYSPARK_HOME = "../build/spark-0.7.0/pyspark"
 PYSPARK_MODULE_HOME = "../build/spark-0.7.0/python/pyspark"
 SPARKLER_HOME = "../build/spark-0.7.0/python/sparkler"
