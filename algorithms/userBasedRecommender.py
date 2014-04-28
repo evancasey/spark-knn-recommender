@@ -3,6 +3,7 @@
 import sys
 from collections import defaultdict
 from itertools import combinations
+import random
 import numpy as np
 import pdb
 
@@ -24,6 +25,16 @@ def parseVectorOnItem(line):
     '''
     line = line.split("|")
     return line[1],(line[0],float(line[2]))
+
+def sampleInteractions(item_id,users_with_rating,n):
+    '''
+    For items with # interactions > n, replace their interaction history
+    with a sample of n users_with_rating
+    '''
+    if len(users_with_rating) > n:
+        return item_id, random.sample(users_with_rating,n)
+    else:
+        return item_id, users_with_rating
 
 def findUserPairs(item_id,users_with_rating):
     '''
@@ -122,7 +133,8 @@ if __name__ == "__main__":
     Obtain the sparse item-user matrix:
         item_id -> ((user_1,rating),(user2,rating))
     '''
-    item_user_pairs = lines.map(parseVectorOnItem).groupByKey()
+    item_user_pairs = lines.map(parseVectorOnItem).groupByKey().map(
+        lambda p: sampleInteractions(p[0],p[1],500)).cache()
 
     '''
     Get all item-item pair combos:
