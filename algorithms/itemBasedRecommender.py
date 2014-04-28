@@ -63,6 +63,20 @@ def cosine(dot_product,rating_norm_squared,rating2_norm_squared):
     denominator = rating_norm_squared * rating2_norm_squared
     return (numerator / (float(denominator))) if denominator else 0.0
 
+def correlation(size, dot_product, rating_sum, \
+            rating2sum, rating_norm_squared, rating2_norm_squared):
+    '''
+    The correlation between two vectors A, B is
+      [n * dotProduct(A, B) - sum(A) * sum(B)] /
+        sqrt{ [n * norm(A)^2 - sum(A)^2] [n * norm(B)^2 - sum(B)^2] }
+
+    '''
+    numerator = size * dot_product - rating_sum * rating2sum
+    denominator = sqrt(size * rating_norm_squared - rating_sum * rating_sum) * \
+                    sqrt(size * rating2_norm_squared - rating2sum * rating2sum)
+
+    return (numerator / (float(denominator))) if denominator else 0.0
+
 def keyOnFirstItem(item_pair,item_sim_data):
     '''
     For each item-item pair, make the first item's id the key

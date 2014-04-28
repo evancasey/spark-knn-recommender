@@ -38,3 +38,4 @@ nosetests.xml
 # Data files
 ratings10m.txt
 data/ratings10m.txt
+tests/data/*
