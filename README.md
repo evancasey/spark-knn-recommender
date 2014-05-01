@@ -36,7 +36,10 @@ $ python setup.py
 
 Using sparkler
 --------------
-
+Run:
+```bash
+$ python train_and_test.py
+```
 
 
 Running on Amazon EMR
