@@ -1,7 +1,7 @@
-Sparkler
+Spark-knn-recommender
 ===========
 
-Sparkler is a fast, scalable recommendation engine built on top of [PySpark](http://spark.apache.org/docs/0.9.0/python-programming-guide.html), the Python API for [Apache Spark](http://spark.apache.org/). It can be deployed locally or on [Amazon EMR](https://aws.amazon.com/elasticmapreduce/).
+Spark-knn-recommender is a fast, scalable recommendation engine built on top of [PySpark](http://spark.apache.org/docs/0.9.0/python-programming-guide.html), the Python API for [Apache Spark](http://spark.apache.org/). It can be deployed locally or on [Amazon EMR](https://aws.amazon.com/elasticmapreduce/).
 
 Requirements
 ------------
@@ -13,12 +13,12 @@ Requirements
 Installation
 ------------
 
-First, clone sparkler onto your local machine:
+First, clone this repo onto your local machine:
 ```bash
 $ git clone https://github.com/evancasey/sparkler.git
 ```
 
-Configure sparkler in config.py:
+Set your spark cluster configuration in config.py:
 ```python
 
 # change if you are running on Amazon EMR
@@ -29,12 +29,12 @@ PYSPARK_HOME = "../spark/pyspark"
 SPARKLER_HOME = "../spark/python/sparkler"
 ```
 
-In your sparkler directory, run:
+In the root directory, run:
 ```bash
 $ python setup.py
 ```
 
-Using sparkler
+Using spark-knn-recommender
 --------------
 Run:
 ```bash
