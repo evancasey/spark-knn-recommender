@@ -1,4 +1,4 @@
-Spark-knn-recommender
+spark-knn-recommender
 ===========
 
 Spark-knn-recommender is a fast, scalable recommendation engine built on top of [PySpark](http://spark.apache.org/docs/0.9.0/python-programming-guide.html), the Python API for [Apache Spark](http://spark.apache.org/). It can be deployed locally or on [Amazon EMR](https://aws.amazon.com/elasticmapreduce/).
