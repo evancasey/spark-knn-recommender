@@ -163,6 +163,7 @@ if __name__ == "__main__":
     item_sims = pairwise_items.map(
         lambda p: calcSim(p[0],p[1])).map(
         lambda p: keyOnFirstItem(p[0],p[1])).groupByKey().map(
+        lambda p : (p[0], list(p[1]))).map(
         lambda p: nearestNeighbors(p[0],p[1],50)).collect()
 
     '''
